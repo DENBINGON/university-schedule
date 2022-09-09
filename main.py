@@ -5,12 +5,18 @@ import random
 import json
 import os
 import db
+import logging
+import traceback
 
 class Program:
     config = None
     session = None
     longpoll = None
     database = None
+    logger = logging.getLogger("logger")
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler("logs.txt")
+    logger.addHandler(handler)
     def __int__(self):
         self.config = json.loads(open("config/config.json", "r").read())[0]
         self.session = vk_api.VkApi(token=self.config["KEY"])
@@ -24,12 +30,17 @@ class Program:
             self.database = None
 
     def start(self):
-        for event in self.longpoll.listen():
-            if event.type == VkEventType.MESSAGE_NEW:
-                if event.to_me and self.config["PERSONAL"]:
-                    answers, keyboard = Bot().Parse(event.user_id, event.message, self.session)
-                    for answer in answers:
-                        self.WriteMessage(event.user_id, answer, keyboard)
+        while True:
+            try:
+                for event in self.longpoll.listen():
+                    if event.type == VkEventType.MESSAGE_NEW:
+                        if event.to_me and self.config["PERSONAL"]:
+                            self.logger.info(f'New message -> For me by: {event.user_id} -> Text: {event.message} \n')
+                            answers, keyboard = Bot().Parse(event.user_id, event.message, self.session)
+                            for answer in answers:
+                                self.WriteMessage(event.user_id, answer, keyboard)
+            except Exception as e:
+                self.logger.error(traceback.format_exc())
 
     def WriteMessage(self, user_id, message, keyboard='{}'):
         self.session.method('messages.send',
