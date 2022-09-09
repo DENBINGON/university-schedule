@@ -1,0 +1,13 @@
+[
+  {
+    "KEY" : "INSERT_YOUR_APIKEY_HERE",
+    "TESTS" : true,
+    "PERSONAL" : true,
+    "GROUPS" : false,
+    "USEGRANTED" : false,
+    "SAVELOCAL" : false,
+    "ROOTS" : [
+      271808173
+    ]
+  }
+]
