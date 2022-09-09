@@ -1,0 +1,10 @@
+[Unit]
+Description=University Schedule VK BOT
+After=multi-user.target
+[Service]
+Type=simple
+WorkingDirectory=/UniversitySchedule/
+ExecStart=/bin/bash /UniversitySchedule/config/run.sh
+Restart=ON-FAILURE
+[Install]
+WantedBy=multi-user.target
