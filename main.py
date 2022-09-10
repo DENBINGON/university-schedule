@@ -1,4 +1,6 @@
 from vk_api.longpoll import VkLongPoll, VkEventType
+
+import messages
 from parser import Bot
 import vk_api
 import random
@@ -36,10 +38,14 @@ class Program:
                     if event.type == VkEventType.MESSAGE_NEW:
                         if event.to_me and self.config["PERSONAL"]:
                             self.logger.info(f'New message -> For me by: {event.user_id} -> Text: {event.message} \n')
-                            answers, keyboard = Bot().Parse(event.user_id, event.message, self.session)
-                            for answer in answers:
-                                self.WriteMessage(event.user_id, answer, keyboard)
+                            try:
+                                answers, keyboard = Bot().Parse(event.user_id, event.message, self.session)
+                                for answer in answers:
+                                    self.WriteMessage(event.user_id, answer, keyboard)
+                            except:
+                                self.WriteMessage(event.user_id, messages.somthing_wrong, keyboard)
             except Exception as e:
+                print(traceback.format_exc())
                 self.logger.error(traceback.format_exc())
 
     def WriteMessage(self, user_id, message, keyboard='{}'):
