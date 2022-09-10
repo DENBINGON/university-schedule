@@ -57,12 +57,14 @@ class Api:
         return compaired
 
     def get_schedule_on_date(self, group, date, even):
-
-        day_name = self.days[date]
-        if even == 0: even = 2
-        for day in json.loads(self.get_json(group))[even - 1]['schedule']:
-            if day['day'] == day_name:
-                return self.get_pairs(day)
+        try:
+            day_name = self.days[date]
+            if even == 0: even = 2
+            for day in json.loads(self.get_json(group))[even - 1]['schedule']:
+                if day['day'] == day_name:
+                    return self.get_pairs(day)
+        except:
+            pass
 
         return f"В {self.days[date]} пар нет"
 
