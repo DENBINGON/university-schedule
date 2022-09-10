@@ -6,6 +6,7 @@ class Api:
     URL = "https://files.ruslansoloviev.ru/groups/"
 
     days = [
+        'Воскресенье',
         'Понедельник',
         'Вторник',
         'Среда',
@@ -57,7 +58,7 @@ class Api:
 
     def get_schedule_on_date(self, group, date, even):
 
-        day_name = self.days[date - 1]
+        day_name = self.days[date]
         if even == 0: even = 2
         for day in json.loads(self.get_json(group))[even - 1]['schedule']:
             if day['day'] == day_name:

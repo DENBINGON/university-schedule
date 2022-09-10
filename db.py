@@ -33,7 +33,7 @@ class DataBase:
         return self.cursor.execute(f"SELECT user_group FROM users WHERE user_id={user_id}").fetchall()[0][0]
 
     def get_user_info(self, user_id, select_param):
-        return self.cursor.execute(f"SELECT {select_param} FROM users WHERE user_id={user_id}")
+        return self.cursor.execute(f"SELECT {select_param} FROM users WHERE user_id={user_id}").fetchall()[0][0]
 
     def remove_user(self, user_id):
         self.cursor.execute(f"DELETE FROM users WHERE user_id={user_id}")

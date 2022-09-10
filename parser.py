@@ -96,9 +96,10 @@ class Bot:
                                            date.week_of_year%2)], Keyboards.schedule_main
         # Tomorrow
         if last_activity == "RASP" and msg == self.commands_rasp[1]:
+            date = date.add(days=1) 
             return [_api.get_schedule_tomorrow(self.database.get_user_group(user_id),
-                                              date.add(days=1).day_of_week,
-                                              date.add(days=1).week_of_year%2)], Keyboards.schedule_main
+                                              date.day_of_week,
+                                              date.week_of_year%2)], Keyboards.schedule_main
         # Week
         if last_activity == "RASP" and msg == self.commands_rasp[2]:
             self.database.edit_user(user_id, 'last_activity', "EVEN")
