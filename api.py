@@ -44,16 +44,18 @@ class Api:
         return compaired
 
     def get_pairs(self, day):
-        pair_con = 0
         compaired = ""
-        compaired += day['day'].upper() + ":\n\n"
-        for pair in day['pairs']:
-            pair_con += 1
-            compaired += f"[{pair_con}] {pair['title']} - {pair['type']}\n" \
-                         f"    {pair['time']}\n    Аудитория: {pair['classroom']}\n" \
-                         f"    {pair['teacher']}\n" \
-                         f"------\n"
-        compaired = compaired[:-7] + "\n"
+        if not day == [{'day': None, 'pairs': None}]:
+            pair_con = 0
+            compaired += day['day'].upper() + ":\n\n"
+            for pair in day['pairs']:
+                pair_con += 1
+                compaired += f"[{pair_con}] {pair['title']} - {pair['type']}\n" \
+                             f"> {pair['time']}\n> Аудитория: {pair['classroom']}\n" \
+                             f"> {pair['teacher']}\n" \
+                             f"> {pair['period']}\n" \
+                             f"------\n"
+            compaired = compaired[:-7] + "\n"
         return compaired
 
     def get_schedule_on_date(self, group, date, even):
@@ -74,3 +76,4 @@ class Api:
             return requests.get(f"{self.URL}{self.get_depend_code(group)}/{group}.json").text
         else:
             return requests.get(f"{self.URL}groups.json").text
+
