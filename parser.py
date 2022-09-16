@@ -9,7 +9,6 @@ import pendulum
 
 class Bot:
     database = db.DataBase()
-    database.__int__()
     user_id = None
     session = None
     commands_main = ["РАСПИСАНИЕ", "НАСТРОЙКИ", "ИНФОРМАЦИЯ"]

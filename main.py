@@ -1,5 +1,4 @@
 from vk_api.longpoll import VkLongPoll, VkEventType
-
 import messages
 from parser import Bot
 import vk_api
@@ -19,14 +18,13 @@ class Program:
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler("logs.txt")
     logger.addHandler(handler)
-    def __int__(self):
+    def __init__(self):
         self.config = json.loads(open("config/config.json", "r").read())[0]
         self.session = vk_api.VkApi(token=self.config["KEY"])
         self.session._auth_token()
         self.longpoll = VkLongPoll(self.session)
         if not os.path.exists("db.sqlite3"):
             self.database = db.DataBase()
-            self.database.__int__()
             self.database.create_data_base_file()
             self.database.disconnect()
             self.database = None
@@ -56,7 +54,7 @@ class Program:
 if __name__ == "__main__":
     if os.path.exists("config/config.json"):
         daemon = Program()
-        daemon.__int__()
+        daemon.__init__()
         daemon.start()
     else:
         exit(1)

@@ -5,7 +5,7 @@ class DataBase:
     connection = None
     cursor = None
 
-    def __int__(self):
+    def __init__(self):
         self.connection = sqlite3.connect("db.sqlite3")
         self.cursor = self.connection.cursor()
 
