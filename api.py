@@ -14,6 +14,15 @@ class Api:
         'Пятница',
         'Суббота'
     ]
+    days_have_not_pairs = [
+        'В воскресенье',
+        'В понедельник',
+        'Во вторник',
+        'В среду',
+        'В четверг',
+        'В пятницу',
+        'В субботу'
+    ]
 
     def check_group(self, findable_group):
         depends_array = json.loads(self.get_json("", 1))
@@ -63,12 +72,14 @@ class Api:
             day_name = self.days[date]
             if even == 0: even = 2
             for day in json.loads(self.get_json(group))[even - 1]['schedule']:
-                if day['day'] == day_name:
-                    return self.get_pairs(day)
+                try:
+                    if day['day'] == day_name:
+                        return self.get_pairs(day)
+                except:pass
         except:
             pass
 
-        return f"В {self.days[date]} пар нет"
+        return f"{self.days_have_not_pairs[date]} пар нет"
 
     def get_json(self, group, type = 0):
         # types: 0 -> schedule; 1 -> groups.json
