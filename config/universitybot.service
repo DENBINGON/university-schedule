@@ -3,8 +3,9 @@ Description=University Schedule VK BOT
 After=multi-user.target
 [Service]
 Type=simple
+Restart=always
+RuntimeMaxSec=1800
 WorkingDirectory=/universityschedule
 ExecStart=nice -n 19 /bin/bash /universityschedule/run.sh
-Restart=on-failure
 [Install]
 WantedBy=multi-user.target
