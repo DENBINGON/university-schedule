@@ -36,7 +36,7 @@ class Program:
             try:
                 for event in self.longpoll.listen():
                     if event.type == VkEventType.MESSAGE_NEW:
-                        if event.to_me and self.config["PERSONAL"]:
+                        if event.to_me and self.config["PERSONAL"] and event.from_user:
                             self.logger.info(f'New message -> For me by: {event.user_id} -> Text: {event.message} \n')
                             try:
                                 answers, keyboard = Bot().Parse(event.user_id, event.message, self.session)
