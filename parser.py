@@ -13,10 +13,11 @@ class Bot:
     user_id = None
     session = None
     commands_main = ["РАСПИСАНИЕ", "НАСТРОЙКИ", "ИНФОРМАЦИЯ"]
-    commands_rasp = ["СЕГОДНЯ", "ЗАВТРА", "НЕДЕЛЯ", "ДАТА", "НАЗАД"]
-    commands_rasp_week = ["ЧЕТНАЯ", "НЕЧЕТНАЯ", "НАЗАД", "В МЕНЮ"]
+    commands_rasp = ["СЕГОДНЯ", "ЗАВТРА", "НЕДЕЛЯ", "ДАТА", "НАЗАД", "ДЕНЬ НЕДЕЛИ"]
+    commands_week = ["ЧЕТНАЯ", "НЕЧЕТНАЯ", "НАЗАД", "В МЕНЮ"]
     commands_info = ["О БОТЕ", "КОМАНДЫ", "НАЗАД"]
     commands_sett = ["ИЗМЕНИТЬ ГРУППУ", "НАЗАД"]
+    commands_days = ["", "ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"]
 
     def Parse(self, user_id, msg, session):
         self.session = session
@@ -28,10 +29,17 @@ class Bot:
         # If user doesnt exist in database
         if not self.database.check_user(user_id):
             user_info = self.get_user_information(user_id)[0]
-            self.database.add_user(user_id, user_info['first_name'],
-                                   user_info['last_name'], user_info['bdate'],
-                                   user_info['sex'], user_info['country'],
-                                   user_info['city'], user_info['verified'], last_activity="ENTGRP")
+            try:
+                self.database.add_user(user_id, user_info['first_name'],
+                                       user_info['last_name'], user_info['bdate'],
+                                       user_info['sex'], user_info['country'],
+                                       user_info['city'], user_info['verified'], last_activity="ENTGRP")
+            except:
+                self.database.add_user(user_id, user_info['first_name'],
+                                       user_info['last_name'], 'bdate',
+                                       user_info['sex'], {'id': 1, 'title': 'Россия'},
+                                       {'id': 72, 'title': 'Краснодар'}, user_info['verified'], last_activity="ENTGRP")
+
             return [messages.hello(self.database.get_user_info(user_id, 'name')), messages.welcome, messages.edit_group], keyboard
         # Get last activity
         last_activity = self.database.check_activity(user_id)
@@ -66,7 +74,7 @@ class Bot:
         # About this bot
         if last_activity == "INFO" and msg == self.commands_info[0]:
             return [messages.about_bot], Keyboards.info
-        # About bot commands 
+        # About bot commands
         if last_activity == "INFO" and msg == self.commands_info[1]:
             return [messages.about_bot_commands], Keyboards.info
         # Return
@@ -76,7 +84,7 @@ class Bot:
         if last_activity == "INFO":
             return  [answer], Keyboards.info
 
-        # SETTINGS VIEW 
+        # SETTINGS VIEW
         # Update user group
         if last_activity == "SETT" and msg == self.commands_sett[0]:
             self.database.edit_user(user_id, 'last_activity', "ENTGRP")
@@ -96,14 +104,14 @@ class Bot:
                                            date.week_of_year%2)], Keyboards.schedule_main
         # Tomorrow
         if last_activity == "RASP" and msg == self.commands_rasp[1]:
-            date = date.add(days=1) 
+            date = date.add(days=1)
             return [_api.get_schedule_tomorrow(self.database.get_user_group(user_id),
                                               date.day_of_week,
                                               date.week_of_year%2)], Keyboards.schedule_main
         # Week
         if last_activity == "RASP" and msg == self.commands_rasp[2]:
             self.database.edit_user(user_id, 'last_activity', "EVEN")
-            return [messages.select_even], Keyboards.schedule_even
+            return [messages.select_even, f"Сейчас {'четная' if date.week_of_year%2 == 0 else 'нечетная'} неделя"], Keyboards.schedule_even
         # Date
         if last_activity == "RASP" and msg == self.commands_rasp[3]:
             return ["Будет позднее..."], Keyboards.schedule_main
@@ -111,30 +119,72 @@ class Bot:
         if last_activity == "RASP" and msg == self.commands_rasp[4]:
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [messages.to_main], Keyboards.main
+        # Week day select
+        if last_activity == "RASP" and msg == self.commands_rasp[5]:
+            self.database.edit_user(user_id, 'last_activity', "DAYS")
+            return  [messages.to_week_day_select], Keyboards.schedule_days
         if last_activity == "RASP":
             return  [answer], Keyboards.schedule_main
 
         # SCHEDULE EVEN VIEW
         # Even
-        if last_activity == "EVEN" and msg == self.commands_rasp_week[0]:
+        if last_activity == "EVEN" and msg == self.commands_week[0]:
             rasp = _api.get_schedule_week(self.database.get_user_group(user_id), 2)
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [rasp], Keyboards.main
         # Odd
-        if last_activity == "EVEN" and msg == self.commands_rasp_week[1]:
+        if last_activity == "EVEN" and msg == self.commands_week[1]:
             rasp = _api.get_schedule_week(self.database.get_user_group(user_id), 1)
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [rasp], Keyboards.main
         # Return
-        if last_activity == "EVEN" and msg == self.commands_rasp_week[2]:
+        if last_activity == "EVEN" and msg == self.commands_week[2]:
             self.database.edit_user(user_id, 'last_activity', "RASP")
             return [messages.to_rasp], Keyboards.schedule_main
         # To main
-        if last_activity == "EVEN" and msg == self.commands_rasp_week[3]:
+        if last_activity == "EVEN" and msg == self.commands_week[3]:
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [messages.to_main], Keyboards.main
         if last_activity == "EVEN":
-            return  [answer], Keyboards.schedule_main
+            return  [answer], Keyboards.schedule_even
+
+        # SCHEDULE WEEK DAYS SELECT VIEW
+        # Select
+        if last_activity == "DAYS" and msg in self.commands_days:
+            self.database.edit_user(user_id, 'last_activity', f"DAEV{self.commands_days.index(msg)}")
+            return [messages.select_even, f"Сейчас {'четная' if date.week_of_year%2 == 0 else 'нечетная'} неделя"], Keyboards.schedule_even
+        # Return
+        if last_activity == "DAYS" and msg == self.commands_week[2]:
+            self.database.edit_user(user_id, 'last_activity', "RASP")
+            return [messages.to_rasp], Keyboards.schedule_main
+        # To main
+        if last_activity == "DAYS" and msg == self.commands_week[3]:
+            self.database.edit_user(user_id, 'last_activity', "MAIN")
+            return [messages.to_main], Keyboards.main
+        if last_activity == "DAYS":
+            return  [answer], Keyboards.schedule_days
+
+        # DAYS WEEK SELECT VIEW
+        # Even
+        if last_activity[:4] == "DAEV" and msg == self.commands_week[0]:
+            rasp = _api.get_schedule_on_date(self.database.get_user_group(user_id), int(last_activity[-1]), 2)
+            self.database.edit_user(user_id, 'last_activity', "DAYS")
+            return [rasp], Keyboards.schedule_days
+        # Odd
+        if last_activity[:4] == "DAEV" and msg == self.commands_week[1]:
+            rasp = _api.get_schedule_on_date(self.database.get_user_group(user_id), int(last_activity[-1]), 1)
+            self.database.edit_user(user_id, 'last_activity', "DAYS")
+            return [rasp], Keyboards.schedule_days
+        # Return
+        if last_activity[:4] == "DAEV" and msg == self.commands_week[2]:
+            self.database.edit_user(user_id, 'last_activity', "DAYS")
+            return [messages.to_rasp], Keyboards.schedule_days
+        # To main
+        if last_activity[:4] == "DAEV" and msg == self.commands_week[3]:
+            self.database.edit_user(user_id, 'last_activity', "MAIN")
+            return [messages.to_main], Keyboards.main
+        if last_activity[:4] == "DAEV":
+            return [answer], Keyboards.schedule_even
 
         # ANY WAY EXIT
         return [answer], keyboard
@@ -146,3 +196,4 @@ class Bot:
 
     def reformat_schedule_to_message(self, period):
         return period
+
