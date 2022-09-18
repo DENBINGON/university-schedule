@@ -70,7 +70,7 @@ class Bot:
         # To teachers
         if last_activity == "MAIN" and msg == self.commands_main[3]:
             self.database.edit_user(user_id, 'last_activity', "FINDTEAC")
-            return [messages.teacher_main], Keyboards.back
+            return [messages.teacher_warning, messages.teacher_main], Keyboards.back
         if last_activity == "MAIN":
             return  [answer], Keyboards.main
 
@@ -101,6 +101,9 @@ class Bot:
             return  [answer], Keyboards.settings
 
         # TEACHERS VIEW
+        if last_activity == "FINDTEAC" and msg.upper() == "ОТМЕНА":
+            self.database.edit_user(user_id, 'last_activity', "MAIN")
+            return [messages.to_main], Keyboards.main
         if last_activity == "FINDTEAC" and msg == "НАЗАД":
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [messages.to_main], Keyboards.main
@@ -110,7 +113,7 @@ class Bot:
             else:
                 self.database.edit_user(user_id, 'last_activity', "GETTEACRASP")
                 return [messages.teacher_select], _api.get_teachers_on_keyboard(msg)
-        if last_activity == "GETTEACRASP" and msg == "ОТМЕНА":
+        if last_activity == "GETTEACRASP" and msg.upper() == "ОТМЕНА":
             self.database.edit_user(user_id, 'last_activity', "MAIN")
             return [messages.to_main], Keyboards.main
         if last_activity == "GETTEACRASP":
@@ -120,7 +123,6 @@ class Bot:
                 return [pairs], Keyboards.main
             except:
                 return [messages.teacher_have_not_pairs], keyboard
-
 
         # SCHEDULE VIEW
         # Today
