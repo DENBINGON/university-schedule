@@ -83,6 +83,8 @@ class Api:
 
     def get_teachers_on_keyboard(self, surname):
         buttons = []
+        surname = surname.lower()
+        surname = surname[0].upper() + surname[1::]
         for teacher in json.loads(self.get_json(surname, 2)):
             buttons.append([{
                 "action": {
@@ -102,12 +104,37 @@ class Api:
               }])
         return json.dumps({'buttons': buttons}, ensure_ascii=False, sort_keys=False, indent=4)
 
+    def get_teacher_pairs(self, fullname):
+        data = json.loads(self.get_json(fullname, 3))
+        compaired = ""
+        for even in 1, 2:
+            compaired += "НЕЧЕТНАЯ НЕДЕЛЯ\n\n" if even == 1 else "ЧЕТНАЯ НЕДЕЛЯ\n\n"
+            for dayi in range(1,7):
+                day_s= f"{self.days[dayi]}\n"
+                counter = 0
+                pairs_compaired = ""
+                for pair in data:
+                    if pair['even'] == even and pair['day'] == self.days[dayi]:
+                        counter+=1
+                        pairs_compaired+= f"[{counter}] {pair['pair_name']} - {pair['type']}\n" \
+                                    f"> {pair['time']}\n" \
+                                    f"> {pair['classroom']}\n" \
+                                    f"> {pair['period']}\n" \
+                                    f"------\n"
+                if pairs_compaired.count("\n") > 3:
+                    compaired += day_s + pairs_compaired
+                    compaired = compaired[:-7] + "\n"
+
+        return compaired
+
     def get_json(self, req, type = 0):
         # types: 0 -> schedule; 1 -> groups.json
         if type == 0 :
             return requests.get(f"{self.URL}{self.get_depend_code(req)}/{req}.json").text
         elif type == 2:
             return requests.get(f"https://api.ruslansoloviev.ru/teacher/surname/{req}").text
+        elif type == 3:
+            return requests.get(f"https://api.ruslansoloviev.ru/teacher/full/{req.replace(' ', '.')}").text
         else:
             return requests.get(f"{self.URL}groups.json").text
 
