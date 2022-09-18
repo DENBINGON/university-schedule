@@ -11,7 +11,7 @@ class Bot:
     database = db.DataBase()
     user_id = None
     session = None
-    commands_main = ["РАСПИСАНИЕ", "НАСТРОЙКИ", "ИНФОРМАЦИЯ"]
+    commands_main = ["РАСПИСАНИЕ", "НАСТРОЙКИ", "ИНФОРМАЦИЯ", "ПРЕПОДАВАТЕЛЬ"]
     commands_rasp = ["СЕГОДНЯ", "ЗАВТРА", "НЕДЕЛЯ", "ДАТА", "НАЗАД", "ДЕНЬ НЕДЕЛИ"]
     commands_week = ["ЧЕТНАЯ", "НЕЧЕТНАЯ", "НАЗАД", "В МЕНЮ"]
     commands_info = ["О БОТЕ", "КОМАНДЫ", "НАЗАД"]
@@ -66,6 +66,10 @@ class Bot:
         if last_activity == "MAIN" and msg == self.commands_main[2]:
             self.database.edit_user(user_id, 'last_activity', "INFO")
             return [messages.to_info], Keyboards.info
+        # To teachers
+        if last_activity == "MAIN" and msg == self.commands_main[3]:
+            self.database.edit_user(user_id, 'last_activity', "FINDTEAC")
+            return [messages.teacher_main], Keyboards.clear
         if last_activity == "MAIN":
             return  [answer], Keyboards.main
 
@@ -94,6 +98,12 @@ class Bot:
             return [messages.to_main], Keyboards.main
         if last_activity == "SETT":
             return  [answer], Keyboards.settings
+
+        # TEACHERS VIEW
+        if last_activity == "FINDTEAC":
+            self.database.edit_user(user_id, 'last_activity', "GETTEACRASP")
+            return [messages.teacher_select], _api.get_teachers_on_keyboard(msg)
+
 
         # SCHEDULE VIEW
         # Today
