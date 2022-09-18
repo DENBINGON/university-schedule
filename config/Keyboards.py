@@ -1,5 +1,5 @@
 # Main keyboard
-main = '{"one_time":false,"buttons":[[{"action":{"type":"text","label":"Расписание","payload":""},"color":"primary"}],[{"action":{"type":"text","label":"Информация","payload":""},"color":"primary"},{"action":{"type":"text","label":"Настройки","payload":""},"color":"primary"}]]}'
+main = '{"one_time":false,"buttons":[[{"action":{"type":"text","label":"Расписание","payload":""},"color":"primary"}],[{"action":{"type":"text","label":"Преподаватель","payload":""},"color":"primary"}],[{"action":{"type":"text","label":"Информация","payload":""},"color":"primary"},{"action":{"type":"text","label":"Настройки","payload":""},"color":"primary"}]]}'
 
 # Sys keyboards
 back = '{"buttons":[[{"action":{"type":"text","label":"Назад","payload":""},"color":"negative"}]]}'
