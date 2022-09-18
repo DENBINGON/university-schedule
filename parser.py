@@ -6,6 +6,7 @@ import validate
 import messages
 import api
 import pendulum
+import json
 
 class Bot:
     database = db.DataBase()
@@ -21,7 +22,6 @@ class Bot:
     def Parse(self, user_id, msg, session):
         self.session = session
         date = pendulum.now("Europe/Moscow")
-        msg = msg.upper()
         _api = api.Api()
         answer = messages.dont_know
         keyboard = "{}"
@@ -42,6 +42,7 @@ class Bot:
             return [messages.hello(self.database.get_user_info(user_id, 'name')), messages.welcome, messages.edit_group], keyboard
         # Get last activity
         last_activity = self.database.check_activity(user_id)
+        if last_activity != "GETTEACRASP": msg = msg.upper()
         # If user must to add group id
         if last_activity == "ENTGRP":
             if validate.group_validate(msg):
@@ -69,7 +70,7 @@ class Bot:
         # To teachers
         if last_activity == "MAIN" and msg == self.commands_main[3]:
             self.database.edit_user(user_id, 'last_activity', "FINDTEAC")
-            return [messages.teacher_main], Keyboards.clear
+            return [messages.teacher_main], Keyboards.back
         if last_activity == "MAIN":
             return  [answer], Keyboards.main
 
@@ -100,9 +101,25 @@ class Bot:
             return  [answer], Keyboards.settings
 
         # TEACHERS VIEW
+        if last_activity == "FINDTEAC" and msg == "НАЗАД":
+            self.database.edit_user(user_id, 'last_activity', "MAIN")
+            return [messages.to_main], Keyboards.main
         if last_activity == "FINDTEAC":
-            self.database.edit_user(user_id, 'last_activity', "GETTEACRASP")
-            return [messages.teacher_select], _api.get_teachers_on_keyboard(msg)
+            if len(json.loads(_api.get_teachers_on_keyboard(msg))["buttons"]) <= 1:
+                return [messages.teacher_nothing], Keyboards.back
+            else:
+                self.database.edit_user(user_id, 'last_activity', "GETTEACRASP")
+                return [messages.teacher_select], _api.get_teachers_on_keyboard(msg)
+        if last_activity == "GETTEACRASP" and msg == "ОТМЕНА":
+            self.database.edit_user(user_id, 'last_activity', "MAIN")
+            return [messages.to_main], Keyboards.main
+        if last_activity == "GETTEACRASP":
+            try:
+                pairs = _api.get_teacher_pairs(msg)
+                self.database.edit_user(user_id, 'last_activity', "MAIN")
+                return [pairs], Keyboards.main
+            except:
+                return [messages.teacher_have_not_pairs], keyboard
 
 
         # SCHEDULE VIEW
