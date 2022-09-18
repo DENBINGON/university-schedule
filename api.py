@@ -81,10 +81,33 @@ class Api:
 
         return f"{self.days_have_not_pairs[date]} пар нет"
 
-    def get_json(self, group, type = 0):
+    def get_teachers_on_keyboard(self, surname):
+        buttons = []
+        for teacher in json.loads(self.get_json(surname, 2)):
+            buttons.append([{
+                "action": {
+                  "type": "text",
+                  "label": f"{teacher[0]} {teacher[1]} {teacher[2]}",
+                  "payload": ""
+                },
+                "color": "primary"
+              }])
+        buttons.append([{
+                "action": {
+                  "type": "text",
+                  "label": "Отмена",
+                  "payload": ""
+                },
+                "color": "negative"
+              }])
+        return json.dumps({'buttons': buttons}, ensure_ascii=False, sort_keys=False, indent=4)
+
+    def get_json(self, req, type = 0):
         # types: 0 -> schedule; 1 -> groups.json
         if type == 0 :
-            return requests.get(f"{self.URL}{self.get_depend_code(group)}/{group}.json").text
+            return requests.get(f"{self.URL}{self.get_depend_code(req)}/{req}.json").text
+        elif type == 2:
+            return requests.get(f"https://api.ruslansoloviev.ru/teacher/surname/{req}").text
         else:
             return requests.get(f"{self.URL}groups.json").text
 
