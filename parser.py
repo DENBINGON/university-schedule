@@ -120,7 +120,7 @@ class Bot:
             try:
                 pairs = _api.get_teacher_pairs(msg)
                 self.database.edit_user(user_id, 'last_activity', "MAIN")
-                return [pairs], Keyboards.main
+                return [f"Сейчас {'четная' if date.week_of_year%2 == 0 else 'нечетная'} неделя", pairs], Keyboards.main
             except:
                 return [messages.teacher_have_not_pairs], keyboard
 
